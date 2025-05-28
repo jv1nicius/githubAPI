@@ -5,7 +5,7 @@ import { ThemedView } from '../ThemedView';
 
 export type ReposModalProps = {
     visible: boolean;
-    onAdd: (ownerId: string, repoId: string, id: number) => void;
+    onAdd: (ownerId: string, repoId: string, id?: number, ) => void;
     onCancel: () => void;
     repos?: IRepos;
 }

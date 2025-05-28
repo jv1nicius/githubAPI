@@ -7,6 +7,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { IRepos } from '@/interfaces/IRepos';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReposModal from '@/components/modal/ReposModal';
+import axios from 'axios';
 
 export default function ReposListScreen() {
     const [repos, setRepos] = useState<IRepos[]>([]);
@@ -26,31 +27,28 @@ export default function ReposListScreen() {
         getData();
     }, []);
 
-    const onAdd = (ownerId: string, repoId: string, id?: number) => {
-        if (!id || id <= 0) {
+    const onAdd = async (ownerId: string, repoId: string, id?: number) => {
+        try {
+            const response = await axios.get(`https://api.github.com/repos/${ownerId}/${repoId}`);
+            const data = response.data;
+
             const newRepo: IRepos = {
-                id: Math.random() * 1000,
+                id: data.id,
                 ownerId: ownerId,
                 repoId: repoId,
+                ownerUrl: data.owner.avatar_url,
+                creationDate: data.created_at,
             };
+
             const repoPlus: IRepos[] = [...repos, newRepo];
-
             setRepos(repoPlus);
-            AsyncStorage.setItem("@Repos:repos", JSON.stringify(repoPlus));
-        } else {
-            const updatedRepos = repos.map(repo => {
-                if (repo.id === id) {
-                    return { ...repo, ownerId: ownerId, repoId: repoId };
-                }
-                return repo;
-            });
-            setRepos(updatedRepos);
-            AsyncStorage.setItem("@NewsApp:users", JSON.stringify(updatedRepos));
+            await AsyncStorage.setItem("@Repos:repos", JSON.stringify(repoPlus));
+        } catch (e) {
+
+        } finally {
+            setModalVisible(false);
         }
-
-        setModalVisible(false);
-    };
-
+    }
     const closeModal = () => {
         setModalVisible(false);
     };
@@ -69,8 +67,16 @@ export default function ReposListScreen() {
                     <ThemedText style={styles.addButton}>+</ThemedText>
                 </TouchableOpacity>
             </ThemedView>
-
-
+            
+            <ThemedView style={{ paddingHorizontal: 16 }}>
+                {repos.map((repo) => (
+                    <View key={repo.id} style={{ marginBottom: 16 }}>
+                        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{repo.ownerId}/{repo.repoId}</Text>
+                        <Text>🌐 URL: {repo.ownerUrl}</Text>
+                        <Text>📅 Criado em: {new Date(repo.creationDate).toLocaleDateString()}</Text>
+                    </View>
+                ))}
+            </ThemedView>
 
             <ReposModal
                 visible={modalVisible}
