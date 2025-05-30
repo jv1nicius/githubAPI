@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, Text, Alert } from 'react-native';
 import { useState, useEffect } from 'react';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedView } from '@/components/ThemedView';
@@ -7,11 +7,14 @@ import { ThemedText } from '@/components/ThemedText';
 import { IRepos } from '@/interfaces/IRepos';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReposModal from '@/components/modal/ReposModal';
+import { RepositoryItem } from '@/components/RepositoryItem';
 import axios from 'axios';
+import ConfirmDeleteModal from '@/components/modal/ConfirmDeleteModal';
 
 export default function ReposListScreen() {
     const [repos, setRepos] = useState<IRepos[]>([]);
-    const [modalVisible, setModalVisible] = useState(false);
+    const [modalConfirmVisible, setModalConfirmVisible] = useState(false);
+    const [modalDeleteVisible, setModalDeleteVisible] = useState(false);
 
     useEffect(() => {
         async function getData() {
@@ -36,7 +39,7 @@ export default function ReposListScreen() {
                 id: data.id,
                 ownerId: ownerId,
                 repoId: repoId,
-                ownerUrl: data.owner.avatar_url,
+                avatarUrl: data.owner.avatar_url,
                 creationDate: data.created_at,
             };
 
@@ -44,13 +47,26 @@ export default function ReposListScreen() {
             setRepos(repoPlus);
             await AsyncStorage.setItem("@Repos:repos", JSON.stringify(repoPlus));
         } catch (e) {
-
+            Alert.alert("Não encontrado!")
+            window.alert("Não encontrado!")
         } finally {
-            setModalVisible(false);
+            setModalConfirmVisible(false);
         }
     }
+
+    const deleteAll = async () => {
+        try {
+            await AsyncStorage.removeItem("@Repos:repos");
+            setRepos([]);
+            closeModal();
+        } catch (e) {
+
+        }
+    }
+
     const closeModal = () => {
-        setModalVisible(false);
+        setModalConfirmVisible(false);
+        setModalDeleteVisible(false);
     };
 
     return (
@@ -63,25 +79,34 @@ export default function ReposListScreen() {
                 />
             }>
             <ThemedView style={styles.header}>
-                <TouchableOpacity onPress={() => setModalVisible(true)}>
-                    <ThemedText style={styles.addButton}>+</ThemedText>
+                <TouchableOpacity onPress={() => setModalConfirmVisible(true)}>
+                    <Text style={styles.addButton}>+</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setModalDeleteVisible(true)}>
+                    <Text style={styles.delButton}>-</Text>
                 </TouchableOpacity>
             </ThemedView>
-            
-            <ThemedView style={{ paddingHorizontal: 16 }}>
-                {repos.map((repo) => (
-                    <View key={repo.id} style={{ marginBottom: 16 }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{repo.ownerId}/{repo.repoId}</Text>
-                        <Text>🌐 URL: {repo.ownerUrl}</Text>
-                        <Text>📅 Criado em: {new Date(repo.creationDate).toLocaleDateString()}</Text>
-                    </View>
-                ))}
-            </ThemedView>
+
+            {repos.map((repo) => (
+                <RepositoryItem
+                    key={repo.id}
+                    owner={repo.ownerId}
+                    repo={repo.repoId}
+                    date={repo.creationDate}
+                    avatarUrl={repo.ownerUrl}
+                />
+            ))}
 
             <ReposModal
-                visible={modalVisible}
+                visible={modalConfirmVisible}
                 onCancel={closeModal}
                 onAdd={onAdd}
+            />
+
+            <ConfirmDeleteModal
+                visible={modalDeleteVisible}
+                onCancel={closeModal}
+                onDelete={deleteAll}
             />
         </ParallaxScrollView>
 
@@ -113,11 +138,24 @@ const styles = StyleSheet.create({
     header: {
         padding: 16,
         alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 10,
+        marginBottom: 10,
+        height: 20,
+        width: '100%',
     },
     addButton: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#007AFF',
+        backgroundColor: 'green',
+        borderRadius: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flex: 1,
+        fontSize: 40,
+        margin: 10,
+        padding: 5,
+        width: 100,
+        textAlign: 'center',
     },
     modalOverlay: {
         flex: 1,
@@ -165,5 +203,17 @@ const styles = StyleSheet.create({
     modalButtonText: {
         color: '#fff',
         textAlign: 'center',
+    },
+    delButton: {
+        backgroundColor: 'red',
+        borderRadius: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flex: 1,
+        textAlign: 'center',
+        fontSize: 40,
+        margin: 10,
+        padding: 5,
+        width: 100,
     },
 });
