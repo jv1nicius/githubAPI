@@ -4,4 +4,6 @@ export interface IRepos {
     repoId: string;
     avatarUrl: string;
     creationDate: string;
+    ownerHtmlUrl: string;
+    reposHtmlUrl: string;
 }

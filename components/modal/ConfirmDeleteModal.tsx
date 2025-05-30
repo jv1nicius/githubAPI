@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Modal, View, Text, StyleSheet, TouchableOpacity, Button } from 'react-native';
+import React from 'react';
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export type ConfirmDeleteModalProps = {
   visible: boolean;
@@ -24,6 +24,7 @@ export default function ConfirmDeleteModal({ visible, onDelete, onCancel }: Conf
           <Text style={styles.modalText}>Tem certeza que deseja deletar todos estes dados?</Text>
 
           <View style={styles.buttonContainer}>
+
             <TouchableOpacity style={styles.cancelButton} onPress={() => onCancel()}>
               <Text style={styles.cancelText}>Cancelar</Text>
             </TouchableOpacity>
@@ -31,6 +32,7 @@ export default function ConfirmDeleteModal({ visible, onDelete, onCancel }: Conf
             <TouchableOpacity style={styles.deleteButton} onPress={() => Delete()}>
               <Text style={styles.deleteText}>Deletar</Text>
             </TouchableOpacity>
+
           </View>
         </View>
       </View>
@@ -40,16 +42,6 @@ export default function ConfirmDeleteModal({ visible, onDelete, onCancel }: Conf
 
 }
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 20,
-    marginBottom: 20,
-  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',

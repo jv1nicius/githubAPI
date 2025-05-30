@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { IRepos } from '@/interfaces/IRepos';
-import { ThemedView } from '../ThemedView';
+import { Modal, View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { IRepos } from '@/interfaces/IRepos'; // Mantenha sua interface de repositórios
 
 export type ReposModalProps = {
   visible: boolean;
-  onAdd: (ownerId: string, repoId: string, id?: number,) => void;
+  onAdd: (ownerId: string, repoId: string, id?: number) => void;
   onCancel: () => void;
   repos?: IRepos;
 }
@@ -17,103 +16,136 @@ export default function ReposModal({ visible, onAdd, onCancel, repos }: ReposMod
 
   useEffect(() => {
     if (repos) {
-      setOwnerId(repos.ownerId.trim())
-      setRepoId(repos.repoId.trim())
-      setId(repos.id)
+      setOwnerId(repos.ownerId.trim());
+      setRepoId(repos.repoId.trim());
+      setId(repos.id);
     } else {
-      setOwnerId('')
-      setRepoId('')
-      setId(0)
+      setOwnerId('');
+      setRepoId('');
+      setId(0);
     }
   }, [repos]);
 
+  const handleAdd = () => {
+    onAdd(ownerId, repoId, id);
+  };
+
   return (
-    <Modal visible={visible} animationType='slide' transparent={true} onRequestClose={() => { }}>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.boxContainer}>
-          <Text style={styles.title}>OwnerId</Text>
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={visible}
+      onRequestClose={() => { }}
+    >
+      <View style={styles.overlay}>
+        <View style={styles.modal}>
+          <Text style={styles.modalTitle}>{repos ? 'Editar Repositório' : 'Adicionar Repositório'}</Text>
+          <Text style={styles.modalText}>Preencha os dados do repositório:</Text>
+
+          <Text style={styles.inputLabel}>Owner ID:</Text>
           <TextInput
-            style={styles.boxInput}
+            style={styles.textInput}
             value={ownerId}
-            onChangeText={text => setOwnerId(text)}
+            onChangeText={setOwnerId}
+            placeholder="proprietário"
+            placeholderTextColor="#888" 
           />
-          <Text style={styles.title}>RepoId</Text>
+
+          <Text style={styles.inputLabel}>Repo ID:</Text>
           <TextInput
-            style={styles.boxInput}
+            style={styles.textInput}
             value={repoId}
-            onChangeText={text => setRepoId(text)}
+            onChangeText={setRepoId}
+            placeholder="repositório"
+            placeholderTextColor="#888"
           />
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.buttonAdd} onPress={() => onAdd(ownerId, repoId, id)}>
-              <Text style={styles.buttonText}>
-                Add
-              </Text>
+            <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
+              <Text style={styles.cancelText}>Cancelar</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.buttonCancel} onPress={() => onCancel()}>
-              <Text style={styles.buttonText}>
-                Cancel
-              </Text>
+
+            <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
+              <Text style={styles.addText}>{repos ? 'Salvar' : 'Adicionar'}</Text>
             </TouchableOpacity>
           </View>
-        </ThemedView>
-      </ThemedView>
+        </View>
+      </View>
     </Modal>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'rgba(0, 0, 0.7)',
-    alignContent: 'center',
-    justifyContent: 'center',
+  overlay: {
     flex: 1,
-  },
-  boxContainer: {
-    backgroundColor: '#FFF',
-    borderRadius: 10,
-    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
-    margin: 20,
+    alignItems: 'center',
   },
-  boxInput: {
-    alignSelf: 'stretch',
-    height: 40,
-    borderRadius: 5,
-    backgroundColor: '#DDD',
-    margin: 5,
+  modal: {
+    backgroundColor: 'white',
+    width: 300,
+    padding: 20,
+    borderRadius: 8,
+    elevation: 5,
   },
-  title: {
-    fontSize: 24,
+  modalTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
-    lineHeight: 32,
+    marginBottom: 10,
+    textAlign: 'center', 
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  inputLabel: {
+    fontSize: 14,
+    marginBottom: 5,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  textInput: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 15,
+    fontSize: 16,
   },
   buttonContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     marginTop: 10,
-    height: 20,
-  }
-  ,
-  buttonText: {
+  },
+  cancelButton: {
+    backgroundColor: '#ccc',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    flex: 1, 
+    marginRight: 10,
+    alignItems: 'center',
+  },
+  addButton: {
+    backgroundColor: '#28a745',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    flex: 1,
+    marginLeft: 10,
+    alignItems: 'center',
+  },
+  cancelText: {
+    color: '#000',
     fontWeight: 'bold',
-    color: '#FFF',
+    fontSize: 16,
   },
-  buttonAdd: {
-    backgroundColor: 'green',
-    borderRadius: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    margin: 10,
-    padding: 20,
-  },
-  buttonCancel: {
-    backgroundColor: 'orange',
-    borderRadius: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    margin: 10,
-    padding: 20,
+  addText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });

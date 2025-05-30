@@ -1,9 +1,8 @@
 import { Image } from 'expo-image';
-import { StyleSheet, TouchableOpacity, View, Text, Alert } from 'react-native';
+import { StyleSheet, TouchableOpacity, Text, Alert } from 'react-native';
 import { useState, useEffect } from 'react';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
 import { IRepos } from '@/interfaces/IRepos';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReposModal from '@/components/modal/ReposModal';
@@ -40,17 +39,19 @@ export default function ReposListScreen() {
                 ownerId: ownerId,
                 repoId: repoId,
                 avatarUrl: data.owner.avatar_url,
+                ownerHtmlUrl: data.owner.html_url,
+                reposHtmlUrl: data.html_url,
                 creationDate: data.created_at,
             };
 
             const repoPlus: IRepos[] = [...repos, newRepo];
             setRepos(repoPlus);
             await AsyncStorage.setItem("@Repos:repos", JSON.stringify(repoPlus));
+            setModalConfirmVisible(false)
         } catch (e) {
+            console.log(e);
             Alert.alert("Não encontrado!")
             window.alert("Não encontrado!")
-        } finally {
-            setModalConfirmVisible(false);
         }
     }
 
@@ -60,7 +61,7 @@ export default function ReposListScreen() {
             setRepos([]);
             closeModal();
         } catch (e) {
-
+            console.log(e);
         }
     }
 
@@ -78,6 +79,7 @@ export default function ReposListScreen() {
                     style={styles.reactLogo}
                 />
             }>
+
             <ThemedView style={styles.header}>
                 <TouchableOpacity onPress={() => setModalConfirmVisible(true)}>
                     <Text style={styles.addButton}>+</Text>
@@ -93,7 +95,9 @@ export default function ReposListScreen() {
                     owner={repo.ownerId}
                     repo={repo.repoId}
                     date={repo.creationDate}
-                    avatarUrl={repo.ownerUrl}
+                    avatarUrl={repo.avatarUrl}
+                    ownerHtmlUrl={repo.ownerHtmlUrl}
+                    reposHtmlUrl={repo.reposHtmlUrl}
                 />
             ))}
 
@@ -113,18 +117,8 @@ export default function ReposListScreen() {
     );
 }
 
-//copiei o design do chatgpt, ent tem coisas desnecessárias para remover, 27/05/2025.
 
 const styles = StyleSheet.create({
-    titleContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    stepContainer: {
-        gap: 8,
-        marginBottom: 8,
-    },
     reactLogo: {
         height: 178,
         width: 290,
@@ -132,21 +126,18 @@ const styles = StyleSheet.create({
         left: 0,
         position: 'absolute',
     },
-    container: {
-        flex: 1,
-    },
     header: {
         padding: 16,
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 10,
-        marginBottom: 10,
+        marginTop: 5,
+        marginBottom: 15,
         height: 20,
         width: '100%',
     },
     addButton: {
-        backgroundColor: 'green',
+        backgroundColor: '#61dbfb',
         borderRadius: 5,
         alignItems: 'center',
         justifyContent: 'center',
@@ -156,56 +147,11 @@ const styles = StyleSheet.create({
         padding: 5,
         width: 100,
         textAlign: 'center',
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'center',
-        padding: 24,
-    },
-    modalContent: {
-        backgroundColor: '#fff',
-        borderRadius: 8,
-        padding: 24,
-        shadowColor: '#000',
-        elevation: 5,
-    },
-    modalTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 16,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 6,
-        padding: 10,
-        marginBottom: 12,
-    },
-    modalButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    modalButton: {
-        backgroundColor: '#007AFF',
-        padding: 10,
-        borderRadius: 6,
-        flex: 1,
-        marginRight: 8,
-    },
-    modalButtonCancel: {
-        backgroundColor: '#ccc',
-        padding: 10,
-        borderRadius: 6,
-        flex: 1,
-        marginLeft: 8,
-    },
-    modalButtonText: {
-        color: '#fff',
-        textAlign: 'center',
+        color: 'white',
+
     },
     delButton: {
-        backgroundColor: 'red',
+        backgroundColor: '#e74c3c',
         borderRadius: 5,
         alignItems: 'center',
         justifyContent: 'center',
@@ -215,5 +161,6 @@ const styles = StyleSheet.create({
         margin: 10,
         padding: 5,
         width: 100,
+        color: 'white',
     },
 });
